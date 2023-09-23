@@ -58,26 +58,37 @@ We calculating the amount of tickets by dividing with the price of the ticket wi
 
 # Option 6
 We multiple common table expressions(CTE), i.e. temporary tables in this query.
-## partition1: creates a table which gathers information about the gigID, actID, actName and a year column( which is extracted from the timestamp of ontime and is converted to string) for all the headlines that are already calculated by the headline view(which already filters out the gigs that are cancelled).
-## totals: creates a table with a column that has the number of headlines of each distinct act
-## view option6a: Is a view that is created for the total row of each act. It has the same column twice so that we can use Union with the main view.
-## view option6: At the end it joins the partition1 with the totals and adds the option6a using UNION. The data are all sorted using the extra column , totals , that we won’t need in the final result. Which is why in the query in java we only select actname, year and count.
+## partition1: 
+Creates a table which gathers information about the gigID, actID, actName and a year column( which is extracted from the timestamp of ontime and is converted to string) for all the headlines that are already calculated by the headline view(which already filters out the gigs that are cancelled).
+## totals:
+Creates a table with a column that has the number of headlines of each distinct act
+## view option6a: 
+Is a view that is created for the total row of each act. It has the same column twice so that we can use Union with the main view.
+## view option6: 
+At the end it joins the partition1 with the totals and adds the option6a using UNION. The data are all sorted using the extra column , totals , that we won’t need in the final result. Which is why in the query in java we only select actname, year and count.
 
 
 # Option 7
 In this option the java query is very simple since we just select everything from the view option7. But, option7 uses many other views to present the final result.
-## option7a: to get the amount of tickets that each customer bought for a gig
-## option7c: Uses the information gathered in option 7a and adds it as extra columns on the columns from the headlines view that were gathered in option7b.
-## option7e: Uses grouping on email and actID on the view option7c to get the total tickets that each customer bough for each act. 
-## option7f: Joins the previous two options plus the option option7d which calculates the number of years an act was a headline. So In option7f we get a large table and we make sure to sure Left Join in order to not loose records.
-## option7f: We add another column from Join by selecting count from grouping by customer emails and  acts on option7c. This new count column is the number of years that a specific customer has the specific gig when it was headline.
-## option7: Here we select only the rows that the number of years of attendance is the same as the number_of_years which is the number of years that the act was headline , or select the null which indicates that such a customer does not exist, but we still want to represent. We also order by actname ascending  and the total tickets per act descending. In the final query we select only the actname and customer email and also specify that we want Null to be represented by ‘[None]’.
+## option7a: 
+To get the amount of tickets that each customer bought for a gig
+## option7c: 
+Uses the information gathered in option 7a and adds it as extra columns on the columns from the headlines view that were gathered in option7b.
+## option7e: 
+Uses grouping on email and actID on the view option7c to get the total tickets that each customer bough for each act. 
+## option7f: 
+Joins the previous two options plus the option option7d which calculates the number of years an act was a headline. So In option7f we get a large table and we make sure to sure Left Join in order to not loose records.
+## option7f:
+We add another column from Join by selecting count from grouping by customer emails and  acts on option7c. This new count column is the number of years that a specific customer has the specific gig when it was headline.
+## option7:
+Here we select only the rows that the number of years of attendance is the same as the number_of_years which is the number of years that the act was headline , or select the null which indicates that such a customer does not exist, but we still want to represent. We also order by actname ascending  and the total tickets per act descending. In the final query we select only the actname and customer email and also specify that we want Null to be represented by ‘[None]’.
 
 
 # Option 8
 
 First we create the tickets_required() function that will return the least amount of tickets needed to so that the single act gig breaks even in the specific venue. Firstly this function calculates the average cost of all tickets sold, excluding the cancelled ones. Tickets that have price 0 may still be included as long as the related gig to that ticket was not cancelled. That’s why we first get the subset tickets that are not cancelled(i.e. their gigID does not exist in the the gigIDs of the subset of the gig table that contains entries with gigStatus=’Cancelled’). Right after we calculate the average we then proceeded with a mathematical formula consisting of the ceiling function and division to find how many average cost tickets we need to have at least the same as the hirecost and standardfee combined.  The function will return 0 in case the amount of tickets exceeds the capacity of the venue, otherwise it will return the least ticket number required that was just calculated.
 
-##View option8: Regarding this view, table1 is a cross join of act and venue-since we want to try every combination- and we add as an extra column the result of the the tickets_required() function calculated for each row. From this table we select only the positive results of the function(for reasons specified above),  and we order by venueid ascending and ticket number descending as specified(while selecting to show only the rows venuename,actname,ticket_number).  
+## View option8:
+Regarding this view, table1 is a cross join of act and venue-since we want to try every combination- and we add as an extra column the result of the the tickets_required() function calculated for each row. From this table we select only the positive results of the function(for reasons specified above),  and we order by venueid ascending and ticket number descending as specified(while selecting to show only the rows venuename,actname,ticket_number).  
  
 
